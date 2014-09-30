@@ -17,7 +17,7 @@ extern int biomet_input_format;
 
 struct Points
 {
-  unsigned long PosX, PosY, Timestamp, Button, Azimuth, Altitude, Pression;
+  long PosX, PosY, Timestamp, Button, Azimuth, Altitude, Pression;
 };
 
 istream &operator>>(istream& is,
@@ -34,12 +34,33 @@ class Signature
   void load(string filename);
   void save(string filename, vector<Points> data);
   void rotate(vector<Points>& data);
+
+  // Algorithm
+  long DTW(vector<Points>& data1, vector<Points>& data2);
+
+  // Shape Caracteristics
+  long L(vector<Points>& data1);
+  long DPD(vector<Points>& data);
+  long RGD(vector<Points>& data);
+  long RHB(vector<Points>& data);
+  long RXY(vector<Points>& data);
+  long APD(vector<Points>& data);
+  long SA(vector<Points>& data);
+  long SAA(vector<Points>& data);
+
+  // Dynamic Caracteristics
+  long TT(std::vector<Points>& data);
+  long VMV(std::vector<Points>& data);
+  long VMH(std::vector<Points>& data);
+
+
   vector<Points> getData() {return data_;};
 
  private:
-  unsigned long means_(vector<Points> data, char variable);
-  unsigned long variance_(vector<Points> data, char variable);
-  unsigned long covariance_(vector<Points> data);
+  long means_(vector<Points> data, char variable);
+  long variance_(vector<Points> data, char variable);
+  long covariance_(vector<Points> data);
+  long euclidian_distance_(Points &a, Points &b);
   vector<Points> data_;
 };
 

@@ -1,3 +1,6 @@
+#include <limits>
+#include <algorithm>
+#include <math.h>
 #include "signature.h"
 
 using namespace std;
@@ -66,12 +69,12 @@ void Signature::save(string filename, vector<Points> data)
 void Signature::rotate(vector<Points>& data)
 {
   int dir, x, y;
-  unsigned long mx = means_(data, 'X');
-  unsigned long my = means_(data, 'Y');
-  unsigned long varx = variance_(data, 'X');
-  unsigned long vary = variance_(data, 'Y');
-  unsigned long cov = covariance_(data);
-  unsigned long a, angle, b, coef, D, E = 0;
+  long mx = means_(data, 'X');
+  long my = means_(data, 'Y');
+  long varx = variance_(data, 'X');
+  long vary = variance_(data, 'Y');
+  long cov = covariance_(data);
+  long a, angle, b, coef, D, E = 0;
 
   D = sqrt((varx - vary) * (varx - vary) + 4 * cov);
   a = sqrt(1 / 2 + (varx - vary) / 2 * D);
@@ -90,12 +93,177 @@ void Signature::rotate(vector<Points>& data)
     }
  }
 
-//=================== PRIVATE METHODS =================
-
-unsigned long Signature::means_(vector<Points> data, char variable)
+// Might Require some improvement
+long Signature::DTW(vector<Points>& data1, vector<Points>& data2)
 {
-  unsigned long mX = 0;
-  unsigned long mY = 0;
+  int N = data1.size();
+  int M = data2.size();
+  long cost = 0;
+  int total = 0;
+
+  long DTW[N][M];
+
+  for (int i = 0; i < N; ++i)
+  {
+    for (int j = 0; j < M; ++j)
+      DTW[i][j] = std::numeric_limits<long>::max();
+  }
+
+  DTW[0][0] = 0;
+
+  for (int i = 0; i < N; ++i)
+  {
+    for (int j = 0; j < M; ++j)
+    {
+      total++;
+      cost = euclidian_distance_(data1[i], data2[j]);
+      DTW[i][j] = cost + min(DTW[i - 1][j], min(DTW[i][j - 1], DTW[i - 1][j - 1]));
+    }
+  }
+
+  return DTW[N - 1][M - 1] / total;
+}
+
+//================ SHAPE CHARACTERISTICS ================
+
+long Signature::L(vector<Points>& data)
+{
+  long L = 0;
+  int N = data.size();
+
+  for (int i = 0; i < N - 1; ++i)
+    L += euclidian_distance_(data[i], data[i + 1]);
+
+  return L;
+}
+
+long Signature::DPD(vector<Points>& data)
+{
+  long DPD = 0;
+  int N = data.size();
+
+  DPD = euclidian_distance_(data[0], data[N - 1]);
+
+  return DPD;
+}
+
+// La formule donnée dans le pdf n'a pas de sens...
+long Signature::RGD(vector<Points>& data)
+{
+  long maxG = 0;
+  long maxD = 0;
+  int N = data.size();
+
+  return 0;
+}
+
+// idem
+long Signature::RHB(vector<Points>& data)
+{
+  long RHB = 0;
+  int N = data.size();
+
+
+
+  return RHB;
+}
+
+
+long Signature::RXY(vector<Points>& data)
+{
+  long RX = 0;
+  long RY = 0;
+  long RXY = 0;
+  int N = data.size();
+
+  for (int i = 0; i < N - 1; ++i)
+    RX += (data[i].PosX - data[i + 1].PosX);
+
+  for (int i = 0; i < N - 1; ++i)
+    RY += (data[i].PosY - data[i + 1].PosY);
+
+  RXY = RX / RY;
+
+  return RXY;
+}
+
+long Signature::APD(vector<Points>& data)
+{
+  long APD = 0;
+  int N = data.size();
+
+  APD = atan((data[N - 1].PosY - data[0].PosY) / (data[N - 1].PosX - data[0].PosX));
+
+  return APD;
+}
+
+long Signature::SA(vector<Points>& data)
+{
+  long SA = 0;
+  int N = data.size();
+
+  for (int i = 0; i < N - 1; ++i)
+    SA += atan((data[i + 1].PosY -  data[i].PosY) / (data[i + 1].PosX -  data[i].PosX));
+
+  return SA;
+}
+
+long Signature::SAA(vector<Points>& data)
+{
+  long SAA = 0;
+  int N = data.size();
+
+  for (int i = 0; i < N - 1; ++i)
+    SAA += std::abs(atan((data[i + 1].PosY -  data[i].PosY) / (data[i + 1].PosX -  data[i].PosX)));
+
+  return SAA;
+}
+
+//=============== DYNAMIC CHARACTERISTICS ===============
+
+long Signature::TT(std::vector<Points>& data)
+{
+  long N = data.size();
+  long TT = 0;
+
+  TT = data[N - 1].Timestamp - data[0].Timestamp;
+
+  return TT;
+}
+
+long Signature::VMV(std::vector<Points>& data)
+{
+  long N = data.size();
+  long VMV = 0;
+  long VMY = 0;
+
+  for (int i = 0; i < N - 1; ++i)
+    VMY += std::abs(data[i + 1].PosY - data[i].PosY);
+
+  VMV = VMY / TT(data);
+
+  return VMV;
+}
+
+long Signature::VMH(std::vector<Points>& data)
+{
+  long N = data.size();
+  long VMH = 0;
+  long VMX = 0;
+
+  for (int i = 0; i < N - 1; ++i)
+    VMX += std::abs(data[i + 1].PosX - data[i].PosX);
+
+  VMH = VMX / TT(data);
+  
+  return VMH;
+}
+//=================== PRIVATE METHODS ===================
+
+long Signature::means_(vector<Points> data, char variable)
+{
+  long mX = 0;
+  long mY = 0;
 
   for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
     {
@@ -117,12 +285,12 @@ unsigned long Signature::means_(vector<Points> data, char variable)
     }
 }
 
-unsigned long Signature::variance_(vector<Points> data, char variable)
+long Signature::variance_(vector<Points> data, char variable)
 {
-  unsigned long mx = means_(data, 'X');
-  unsigned long my = means_(data, 'Y');
-  unsigned long varX = 0;
-  unsigned long varY = 0;
+  long mx = means_(data, 'X');
+  long my = means_(data, 'Y');
+  long varX = 0;
+  long varY = 0;
 
   for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
     {
@@ -144,14 +312,19 @@ unsigned long Signature::variance_(vector<Points> data, char variable)
     }
 }
 
-unsigned long Signature::covariance_(vector<Points> data)
+long Signature::covariance_(vector<Points> data)
 {
-  unsigned long mx = means_(data, 'X');
-  unsigned long my = means_(data, 'Y');
-  unsigned long total = 0;
+  long mx = means_(data, 'X');
+  long my = means_(data, 'Y');
+  long total = 0;
   
   for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
     total += (i->PosX - mx) * (i->PosY - my);
 
   return total / data.size();
+}
+
+long Signature::euclidian_distance_(Points &a, Points &b)
+{
+  return sqrt(pow((a.PosX - b.PosX), 2) + pow((a.PosY - b.PosY), 2));
 }
