@@ -1,4 +1,5 @@
 #include "signature.h"
+#include "printer.h"
 
 using namespace std;
 
@@ -8,7 +9,8 @@ int main(int argc, char *argv[])
 {
   Signature sign;
   vector<Points> data;
- 
+  Printer p;
+
   if (argc < 2)
     {
       cout << "veuillez mettre 2 arguments" << endl;
@@ -17,6 +19,13 @@ int main(int argc, char *argv[])
     {
       sign.load(argv[1]);
       data = sign.getData();
+      p.addSignature("OLD SIGNATURE", data);
+
+      sign.rotate(data);
+      
+      p.addSignature("NEW SIGNATURE", data);
+      p.print();
+
       sign.save(argv[2], data);
     }
 

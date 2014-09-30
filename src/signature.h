@@ -64,4 +64,4 @@ class Signature
   vector<Points> data_;
 };
 
-#endif
+#endif /* SIGNATURE_HH */
