@@ -93,6 +93,19 @@ void Signature::rotate(vector<Points>& data)
     }
  }
 
+void Signature::centrage(vector<Points>& data)
+{
+  long mx = means_(data, 'X');
+  long my = means_(data, 'Y');
+  long x,y;
+  
+  for (vector<Points>::iterator it = data.begin(); it != data.end(); ++it)
+  {
+    it->PosX = it->PosX - mx;
+    it->PosY = it->PosY - my;
+  }
+}
+
 // Might Require some improvement
 long Signature::DTW(vector<Points>& data1, vector<Points>& data2)
 {

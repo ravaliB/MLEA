@@ -34,6 +34,7 @@ class Signature
   void load(string filename);
   void save(string filename, vector<Points> data);
   void rotate(vector<Points>& data);
+  void centrage(vector<Points>& data);
 
   // Algorithm
   long DTW(vector<Points>& data1, vector<Points>& data2);
