@@ -20,7 +20,7 @@ void Printer::writeSignature(std::string file, std::vector<Points> data)
 	FILE *temp = fopen(file.c_str(), "w+");
 
 	for (int i = 0; i < data.size(); ++i)
-		fprintf(temp, "%ld %ld \n", data[i].PosX, data[i].PosY);
+		fprintf(temp, "%f %f \n", data[i].PosX, data[i].PosY);
 
 	fclose(temp);
 }

@@ -17,7 +17,7 @@ extern int biomet_input_format;
 
 struct Points
 {
-  long PosX, PosY, Timestamp, Button, Azimuth, Altitude, Pression;
+  double PosX, PosY, Timestamp, Button, Azimuth, Altitude, Pression;
 };
 
 istream &operator>>(istream& is,
@@ -37,31 +37,31 @@ class Signature
   void centrage(vector<Points>& data);
 
   // Algorithm
-  long DTW(vector<Points>& data1, vector<Points>& data2);
+  double DTW(vector<Points>& data1, vector<Points>& data2);
 
   // Shape Caracteristics
-  long L(vector<Points>& data1);
-  long DPD(vector<Points>& data);
-  long RGD(vector<Points>& data);
-  long RHB(vector<Points>& data);
-  long RXY(vector<Points>& data);
-  long APD(vector<Points>& data);
-  long SA(vector<Points>& data);
-  long SAA(vector<Points>& data);
+  double L(vector<Points>& data1);
+  double DPD(vector<Points>& data);
+  double RGD(vector<Points>& data);
+  double RHB(vector<Points>& data);
+  double RXY(vector<Points>& data);
+  double APD(vector<Points>& data);
+  double SA(vector<Points>& data);
+  double SAA(vector<Points>& data);
 
   // Dynamic Caracteristics
-  long TT(std::vector<Points>& data);
-  long VMV(std::vector<Points>& data);
-  long VMH(std::vector<Points>& data);
+  double TT(std::vector<Points>& data);
+  double VMV(std::vector<Points>& data);
+  double VMH(std::vector<Points>& data);
 
 
   vector<Points> getData() {return data_;};
 
  private:
-  long means_(vector<Points> data, char variable);
-  long variance_(vector<Points> data, char variable);
-  long covariance_(vector<Points> data);
-  long euclidian_distance_(Points &a, Points &b);
+  double means_(vector<Points> data, char variable);
+  double variance_(vector<Points> data, char variable);
+  double covariance_(vector<Points> data);
+  double euclidian_distance_(Points &a, Points &b);
   vector<Points> data_;
 };
 

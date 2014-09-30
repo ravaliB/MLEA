@@ -21,8 +21,10 @@ int main(int argc, char *argv[])
       data = sign.getData();
       p.addSignature("OLD SIGNATURE", data);
 
-      sign.rotate(data);
       
+      sign.centrage(data);
+      sign.rotate(data);
+
       p.addSignature("NEW SIGNATURE", data);
       p.print();
 

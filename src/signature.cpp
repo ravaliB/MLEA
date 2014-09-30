@@ -69,16 +69,16 @@ void Signature::save(string filename, vector<Points> data)
 void Signature::rotate(vector<Points>& data)
 {
   int dir, x, y;
-  long mx = means_(data, 'X');
-  long my = means_(data, 'Y');
-  long varx = variance_(data, 'X');
-  long vary = variance_(data, 'Y');
-  long cov = covariance_(data);
-  long a, angle, b, coef, D, E = 0;
+  double mx = means_(data, 'X');
+  double my = means_(data, 'Y');
+  double varx = variance_(data, 'X');
+  double vary = variance_(data, 'Y');
+  double cov = covariance_(data);
+  double a, angle, b, coef, D, E = 0;
 
   D = sqrt((varx - vary) * (varx - vary) + 4 * cov);
-  a = sqrt(1 / 2 + (varx - vary) / 2 * D);
-  b = cov / abs(cov) * sqrt(1 / 2 - (varx - vary) / 2 * D);
+  a = sqrt(1 / 2 + ((varx - vary) / (2 * D)));
+  b = (cov / abs(cov)) * sqrt(1 / 2 - ((varx - vary) / (2 * D)));
   coef = b/a;
   angle = atan(coef);
   dir = coef > 0 ? -1 : 1;
@@ -95,9 +95,9 @@ void Signature::rotate(vector<Points>& data)
 
 void Signature::centrage(vector<Points>& data)
 {
-  long mx = means_(data, 'X');
-  long my = means_(data, 'Y');
-  long x,y;
+  double mx = means_(data, 'X');
+  double my = means_(data, 'Y');
+  double x,y;
   
   for (vector<Points>::iterator it = data.begin(); it != data.end(); ++it)
   {
@@ -107,19 +107,19 @@ void Signature::centrage(vector<Points>& data)
 }
 
 // Might Require some improvement
-long Signature::DTW(vector<Points>& data1, vector<Points>& data2)
+double Signature::DTW(vector<Points>& data1, vector<Points>& data2)
 {
   int N = data1.size();
   int M = data2.size();
-  long cost = 0;
+  double cost = 0;
   int total = 0;
 
-  long DTW[N][M];
+  double DTW[N][M];
 
   for (int i = 0; i < N; ++i)
   {
     for (int j = 0; j < M; ++j)
-      DTW[i][j] = std::numeric_limits<long>::max();
+      DTW[i][j] = std::numeric_limits<double>::max();
   }
 
   DTW[0][0] = 0;
@@ -139,9 +139,9 @@ long Signature::DTW(vector<Points>& data1, vector<Points>& data2)
 
 //================ SHAPE CHARACTERISTICS ================
 
-long Signature::L(vector<Points>& data)
+double Signature::L(vector<Points>& data)
 {
-  long L = 0;
+  double L = 0;
   int N = data.size();
 
   for (int i = 0; i < N - 1; ++i)
@@ -150,9 +150,9 @@ long Signature::L(vector<Points>& data)
   return L;
 }
 
-long Signature::DPD(vector<Points>& data)
+double Signature::DPD(vector<Points>& data)
 {
-  long DPD = 0;
+  double DPD = 0;
   int N = data.size();
 
   DPD = euclidian_distance_(data[0], data[N - 1]);
@@ -161,19 +161,19 @@ long Signature::DPD(vector<Points>& data)
 }
 
 // La formule donnée dans le pdf n'a pas de sens...
-long Signature::RGD(vector<Points>& data)
+double Signature::RGD(vector<Points>& data)
 {
-  long maxG = 0;
-  long maxD = 0;
+  double maxG = 0;
+  double maxD = 0;
   int N = data.size();
 
   return 0;
 }
 
 // idem
-long Signature::RHB(vector<Points>& data)
+double Signature::RHB(vector<Points>& data)
 {
-  long RHB = 0;
+  double RHB = 0;
   int N = data.size();
 
 
@@ -182,11 +182,11 @@ long Signature::RHB(vector<Points>& data)
 }
 
 
-long Signature::RXY(vector<Points>& data)
+double Signature::RXY(vector<Points>& data)
 {
-  long RX = 0;
-  long RY = 0;
-  long RXY = 0;
+  double RX = 0;
+  double RY = 0;
+  double RXY = 0;
   int N = data.size();
 
   for (int i = 0; i < N - 1; ++i)
@@ -200,9 +200,9 @@ long Signature::RXY(vector<Points>& data)
   return RXY;
 }
 
-long Signature::APD(vector<Points>& data)
+double Signature::APD(vector<Points>& data)
 {
-  long APD = 0;
+  double APD = 0;
   int N = data.size();
 
   APD = atan((data[N - 1].PosY - data[0].PosY) / (data[N - 1].PosX - data[0].PosX));
@@ -210,9 +210,9 @@ long Signature::APD(vector<Points>& data)
   return APD;
 }
 
-long Signature::SA(vector<Points>& data)
+double Signature::SA(vector<Points>& data)
 {
-  long SA = 0;
+  double SA = 0;
   int N = data.size();
 
   for (int i = 0; i < N - 1; ++i)
@@ -221,9 +221,9 @@ long Signature::SA(vector<Points>& data)
   return SA;
 }
 
-long Signature::SAA(vector<Points>& data)
+double Signature::SAA(vector<Points>& data)
 {
-  long SAA = 0;
+  double SAA = 0;
   int N = data.size();
 
   for (int i = 0; i < N - 1; ++i)
@@ -234,21 +234,21 @@ long Signature::SAA(vector<Points>& data)
 
 //=============== DYNAMIC CHARACTERISTICS ===============
 
-long Signature::TT(std::vector<Points>& data)
+double Signature::TT(std::vector<Points>& data)
 {
-  long N = data.size();
-  long TT = 0;
+  double N = data.size();
+  double TT = 0;
 
   TT = data[N - 1].Timestamp - data[0].Timestamp;
 
   return TT;
 }
 
-long Signature::VMV(std::vector<Points>& data)
+double Signature::VMV(std::vector<Points>& data)
 {
-  long N = data.size();
-  long VMV = 0;
-  long VMY = 0;
+  double N = data.size();
+  double VMV = 0;
+  double VMY = 0;
 
   for (int i = 0; i < N - 1; ++i)
     VMY += std::abs(data[i + 1].PosY - data[i].PosY);
@@ -258,11 +258,11 @@ long Signature::VMV(std::vector<Points>& data)
   return VMV;
 }
 
-long Signature::VMH(std::vector<Points>& data)
+double Signature::VMH(std::vector<Points>& data)
 {
-  long N = data.size();
-  long VMH = 0;
-  long VMX = 0;
+  double N = data.size();
+  double VMH = 0;
+  double VMX = 0;
 
   for (int i = 0; i < N - 1; ++i)
     VMX += std::abs(data[i + 1].PosX - data[i].PosX);
@@ -273,10 +273,10 @@ long Signature::VMH(std::vector<Points>& data)
 }
 //=================== PRIVATE METHODS ===================
 
-long Signature::means_(vector<Points> data, char variable)
+double Signature::means_(vector<Points> data, char variable)
 {
-  long mX = 0;
-  long mY = 0;
+  double mX = 0;
+  double mY = 0;
 
   for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
     {
@@ -298,12 +298,12 @@ long Signature::means_(vector<Points> data, char variable)
     }
 }
 
-long Signature::variance_(vector<Points> data, char variable)
+double Signature::variance_(vector<Points> data, char variable)
 {
-  long mx = means_(data, 'X');
-  long my = means_(data, 'Y');
-  long varX = 0;
-  long varY = 0;
+  double mx = means_(data, 'X');
+  double my = means_(data, 'Y');
+  double varX = 0;
+  double varY = 0;
 
   for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
     {
@@ -325,11 +325,11 @@ long Signature::variance_(vector<Points> data, char variable)
     }
 }
 
-long Signature::covariance_(vector<Points> data)
+double Signature::covariance_(vector<Points> data)
 {
-  long mx = means_(data, 'X');
-  long my = means_(data, 'Y');
-  long total = 0;
+  double mx = means_(data, 'X');
+  double my = means_(data, 'Y');
+  double total = 0;
   
   for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
     total += (i->PosX - mx) * (i->PosY - my);
@@ -337,7 +337,7 @@ long Signature::covariance_(vector<Points> data)
   return total / data.size();
 }
 
-long Signature::euclidian_distance_(Points &a, Points &b)
+double Signature::euclidian_distance_(Points &a, Points &b)
 {
   return sqrt(pow((a.PosX - b.PosX), 2) + pow((a.PosY - b.PosY), 2));
 }
