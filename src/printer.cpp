@@ -29,7 +29,7 @@ void Printer::addSignature(std::string title, std::vector<Points> data)
 {
 	int numSignal = files.size() + 1;
 
-	std::string file = "log/data" + std::to_string(numSignal) + ".temp";
+	std::string file = "../log/data" + std::to_string(numSignal) + ".temp";
 
 	std::vector<std::string> command = {"set title \"" + title + "\"",
 								"set xlabel \"X\"",

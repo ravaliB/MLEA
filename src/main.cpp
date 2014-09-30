@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 
       
       sign.centrage(data);
-      sign.rotate(data);
+      //sign.rotate(data);
 
       p.addSignature("NEW SIGNATURE", data);
       p.print();
