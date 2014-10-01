@@ -1,6 +1,7 @@
 #include <limits>
 #include <algorithm>
 #include <math.h>
+#include <gsl/gsl_fit.h>
 #include "signature.h"
 
 using namespace std;
@@ -66,32 +67,103 @@ void Signature::save(string filename, vector<Points> data)
   dest.close();
 }
 
+
+inline static double sqr(double x) {
+    return x*x;
+}
+
+int linreg(int n, std::vector<Points> data, double* m, double* b, double* r)
+{
+    double   sumx = 0.0;                        /* sum of x                      */
+    double   sumx2 = 0.0;                       /* sum of x**2                   */
+    double   sumxy = 0.0;                       /* sum of x * y                  */
+    double   sumy = 0.0;                        /* sum of y                      */
+    double   sumy2 = 0.0;                       /* sum of y**2                   */
+
+   for (int i = 0;i < n; i++)   
+      { 
+      sumx  += data[i].PosX;       
+      sumx2 += sqr(data[i].PosX);  
+      sumxy += data[i].PosX * data[i].PosY;
+      sumy  += data[i].PosY;      
+      sumy2 += sqr(data[i].PosY); 
+      } 
+
+   double denom = (n * sumx2 - sqr(sumx));
+   if (denom == 0) {
+       // singular matrix. can't solve the problem.
+       *m = 0;
+       *b = 0;
+       *r = 0;
+       return 1;
+   }
+
+   *m = (n * sumxy  -  sumx * sumy) / denom;
+   *b = (sumy * sumx2  -  sumx * sumxy) / denom;
+   if (r!=NULL) {
+      *r = (sumxy - sumx * sumy / n) /          /* compute correlation coeff     */
+            sqrt((sumx2 - sqr(sumx)/n) *
+            (sumy2 - sqr(sumy)/n));
+   }
+
+   return 0; 
+}
+
 void Signature::rotate(vector<Points>& data)
 {
-  int dir, x, y;
-  double mx = means_(data, 'X');
-  double my = means_(data, 'Y');
-  double varx = variance_(data, 'X');
-  double vary = variance_(data, 'Y');
-  double cov = covariance_(data);
-  double a, angle, b, coef, D, E = 0;
+  double *m = new double;
+  double *b = new double;
+  int N = data.size();
+  int res = 0;
 
-  D = sqrt((varx - vary) * (varx - vary) + 4 * cov);
-  a = sqrt(1 / 2 + ((varx - vary) / (2 * D)));
-  b = (cov / abs(cov)) * sqrt(1 / 2 - ((varx - vary) / (2 * D)));
-  coef = b/a;
-  angle = atan(coef);
-  dir = coef > 0 ? -1 : 1;
+  res = linreg(data.size(), data, m, b, NULL);
 
-  for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
+  if (res == 0)
+  {
+    std::cout << "m : " << *m << std::endl;
+    std::cout << "b : " << *b << std::endl;
+
+    for (int i = 0; i < N; ++i)
     {
-      x = mx + (i->PosX - mx) * cos(angle) - dir * (i->PosY - my) * sin(angle);
-      y = my + dir * (i->PosX - mx) * sin(angle) + (i->PosY - my) * cos(angle);
-      
-      i->PosX = x;
-      i->PosY = y;
+      data[i].PosY = data[i].PosY - *m * data[i].PosX - *b;
+      data[i].PosX = data[i].PosX - *b;
     }
- }
+
+    // Flip
+    // for (int i = 0; i < N; ++i)
+    //   data[i].PosY = data[N - i - 1].PosY;
+
+  }
+  else
+    std::cout << "Linear Regression failed" << std::endl;
+}
+
+// void Signature::rotate(vector<Points>& data)
+// {
+//   int dir, x, y;
+//   double mx = means_(data, 'X');
+//   double my = means_(data, 'Y');
+//   double varx = variance_(data, 'X');
+//   double vary = variance_(data, 'Y');
+//   double cov = covariance_(data);
+//   double a, angle, b, coef, D, E = 0;
+
+//   D = sqrt((varx - vary) * (varx - vary) + 4 * cov);
+//   a = sqrt(1 / 2 + ((varx - vary) / (2 * D)));
+//   b = (cov / abs(cov)) * sqrt(1 / 2 - ((varx - vary) / (2 * D)));
+//   coef = b/a;
+//   angle = atan(coef);
+//   dir = coef > 0 ? -1 : 1;
+
+//   for (vector<Points>::iterator i = data.begin(); i != data.end(); ++i)
+//     {
+//       x = mx + (i->PosX - mx) * cos(angle) - dir * (i->PosY - my) * sin(angle);
+//       y = my + dir * (i->PosX - mx) * sin(angle) + (i->PosY - my) * cos(angle);
+      
+//       i->PosX = x;
+//       i->PosY = y;
+//     }
+//  }
 
 void Signature::centrage(vector<Points>& data)
 {

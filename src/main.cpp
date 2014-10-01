@@ -8,8 +8,12 @@ int biomet_input_format = ios_base::xalloc();
 int main(int argc, char *argv[])
 {
   Signature sign;
-  vector<Points> data;
+  vector<Points> data1;
+  vector<Points> data2;
   Printer p;
+
+  double threshold = 0;
+  double res = 0;
 
   if (argc < 2)
     {
@@ -18,17 +22,29 @@ int main(int argc, char *argv[])
   else
     {
       sign.load(argv[1]);
-      data = sign.getData();
-      p.addSignature("OLD SIGNATURE", data);
+      data1 = sign.getData();
+
+      sign.load(argv[2]);
+      data2 = sign.getData();
+
+
+      //p.addSignature("OLD SIGNATURE", data);
 
       
-      sign.centrage(data);
-      //sign.rotate(data);
+      sign.rotate(data1);
+      sign.centrage(data1);
 
-      p.addSignature("NEW SIGNATURE", data);
-      p.print();
+      sign.rotate(data2);
+      sign.centrage(data2);
 
-      sign.save(argv[2], data);
+      res = sign.DTW(data1, data2);
+
+  //    std::cout << "Res : " << res << std::endl; 
+
+      //p.addSignature("NEW SIGNATURE", data);
+      //p.print();
+
+      //sign.save(argv[2], data1);
     }
 
   return 0;
