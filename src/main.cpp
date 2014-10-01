@@ -1,50 +1,59 @@
 #include "signature.h"
 #include "printer.h"
+#include "parser.h"
+#include "points.h"
 
 using namespace std;
 
 int biomet_input_format = ios_base::xalloc();
 
+int usage()
+{
+	cout << "USAGE : ./compSign [FILE]" << endl;
+	cout << "\tEach line of [FILE] must be written in the following format :" << endl;
+	cout << "\t\\path\\to\\file1.txt \\path\\to\\file2.txt" << endl;
+
+	return -1;
+}
+
 int main(int argc, char *argv[])
 {
-  Signature sign;
-  vector<Points> data1;
-  vector<Points> data2;
-  Printer p;
+	Signature sign;
+  	Printer pr;
+  	Parser pa;
+  	
+  	vector<Points> data1;
+  	vector<Points> data2;
+  	vector<string> files_1;
+  	vector<string> files_2;
 
-  double threshold = 0;
-  double res = 0;
+  	double threshold = 0;
+  	double res = 0;
 
-  if (argc < 2)
+  	if (argc != 2)
+    	usage();
+  	else
     {
-      cout << "veuillez mettre 2 arguments" << endl;
-    }
-  else
-    {
-      sign.load(argv[1]);
-      data1 = sign.getData();
+    	pa.parse(argv[1]);
+    	files_1 = pa.getFiles_1();
+    	files_2 = pa.getFiles_2();
 
-      sign.load(argv[2]);
-      data2 = sign.getData();
+    	if (files_1.size() != files_2.size())
+    		usage();
+    	else
+    	{
+    		for (int i = 0; i < files_1.size(); ++i)
+    		{
+    			sign.loadSignatures(files_1[i], files_2[i]);
+    			sign.reduction();
+    			sign.normalization();
+    			sign.getCharacteristics();
+    			sign.computeScore();
+    			sign.reset();
+    		}
 
-
-      //p.addSignature("OLD SIGNATURE", data);
-
-      
-      sign.rotate(data1);
-      sign.centrage(data1);
-
-      sign.rotate(data2);
-      sign.centrage(data2);
-
-      res = sign.DTW(data1, data2);
-
-  //    std::cout << "Res : " << res << std::endl; 
-
-      //p.addSignature("NEW SIGNATURE", data);
-      //p.print();
-
-      //sign.save(argv[2], data1);
+    		pa.writeOutput(sign.getScores());
+    	}
     }
 
   return 0;

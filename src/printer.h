@@ -1,8 +1,8 @@
 #ifndef PRINTER_H
 #define PRINTER_H
 
-#include "signature.h"
 #include <vector>
+#include "points.h"
 
 class Printer
 {
@@ -18,7 +18,6 @@ class Printer
 		std::vector<std::string> files;
 		std::vector<std::vector<std::string> > commands;
 		std::vector<FILE *> pipes;
-
 };
 
 #endif /* PRINTER_HH */

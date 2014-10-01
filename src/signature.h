@@ -10,15 +10,12 @@
 #include <fstream>
 #include <math.h>
 #include <cmath>
+#include "points.h"
+#include "math_tools.h"
 
 using namespace std;
 
 extern int biomet_input_format;
-
-struct Points
-{
-  double PosX, PosY, Timestamp, Button, Azimuth, Altitude, Pression;
-};
 
 istream &operator>>(istream& is,
 		    Points&  p);
@@ -31,38 +28,43 @@ class Signature
  public:
   Signature();
   ~Signature();
-  void load(string filename);
-  void save(string filename, vector<Points> data);
-  void rotate(vector<Points>& data);
-  void centrage(vector<Points>& data);
+  
+  void reset();
+  void loadSignatures(string file_1, string file_2);
+  void reduction();
+  void getCharacteristics();
+  void normalization();
+  void computeScore();
 
-  // Algorithm
-  double DTW(vector<Points>& data1, vector<Points>& data2);
-
-  // Shape Caracteristics
-  double L(vector<Points>& data1);
-  double DPD(vector<Points>& data);
-  double RGD(vector<Points>& data);
-  double RHB(vector<Points>& data);
-  double RXY(vector<Points>& data);
-  double APD(vector<Points>& data);
-  double SA(vector<Points>& data);
-  double SAA(vector<Points>& data);
-
-  // Dynamic Caracteristics
-  double TT(std::vector<Points>& data);
-  double VMV(std::vector<Points>& data);
-  double VMH(std::vector<Points>& data);
-
-
-  vector<Points> getData() {return data_;};
+  vector<Points> getData1() {return data_1;};
+	vector<Points> getData2() {return data_2;};
+  vector<double> getScores() {return scores;};
 
  private:
-  double means_(vector<Points> data, char variable);
-  double variance_(vector<Points> data, char variable);
-  double covariance_(vector<Points> data);
-  double euclidian_distance_(Points &a, Points &b);
-  vector<Points> data_;
+  // Loader
+  void load(string filename, vector<Points> *data);
+  void save(string filename, vector<Points> data);
+
+  // Reduction
+  void minimum_speed_reduction(vector<Points>& data, int range);
+
+  // Normalization
+  void rotate(vector<Points>& data);
+  void center(vector<Points>& data);
+
+  // Caracteristics
+  double DPD(vector<Points>& data);
+  double SA(vector<Points>& data);
+  
+  // Comparison Method
+  double DTW();
+
+  // Attributes
+  vector<Points> data_1;
+  vector<Points> data_2;
+  vector<double> scores;
+  MathTools mt;
+  double threshold;
 };
 
 #endif /* SIGNATURE_HH */
