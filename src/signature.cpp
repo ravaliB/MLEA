@@ -205,6 +205,15 @@ double Signature::SA(vector<Points>& data)
   return SA;
 }
 
+double Signature::DF(vector<Points> data, int scale)
+{
+  vector<Points> Xe = mt.dilatation(data, scale);
+  double A = mt.getArea(Xe);
+  double res = 2 - (log(A / scale) / log(scale));
+
+  return res;
+}
+
 // COMPARISON METHOD
 
 // Might Require some improvement

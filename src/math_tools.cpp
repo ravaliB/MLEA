@@ -119,3 +119,45 @@ double MathTools::euclidian_distance(Points &a, Points &b)
 {
   return sqrt(pow((a.PosX - b.PosX), 2) + pow((a.PosY - b.PosY), 2));
 }
+
+//get The bounding box of Signature
+double MathTools::getArea(vector<Points> data)
+{
+  double minX = means(data, 'X');
+  double minY = means(data, 'Y');
+  double maxX = means(data, 'X');
+  double maxY = means(data, 'Y');
+  double width, weight;
+ 
+  for (vector<Points>::iterator it = data.begin(); it != data.end(); ++it)
+    {
+      minX = (it->PosX < minX) ? it->PosX : minX;
+      minY = (it->PosY < minY) ? it->PosY : minY;
+      maxX = (it->PosX > maxX) ? it->PosX : maxX;
+      maxY = (it->PosY > maxY) ? it->PosY : maxY;
+    }
+
+  width = maxY - minY;
+  weight = maxX - minX;
+
+  return width * weight;
+}
+
+//A modifier si possible
+vector<Points> MathTools::dilatation(vector<Points> data, int scale)
+{
+  vector<Points> d = data;
+  double mx = means(data, 'X');
+  double my = means(data, 'Y');
+  double dx, dy;
+
+  for (vector<Points>::iterator it = d.begin(); it != d.end(); ++it)
+    {
+      dx = it->PosX - mx;
+      dy = it->PosY - my;
+      it->PosX = (it->PosX + dx) * scale;
+      it->PosY = (it->PosY + dy) * scale;
+    }
+    
+  return d;
+}

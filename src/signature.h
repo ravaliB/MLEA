@@ -55,7 +55,8 @@ class Signature
   // Caracteristics
   double DPD(vector<Points>& data);
   double SA(vector<Points>& data);
-  
+  double DF(vector<Points> data, int scale);
+
   // Comparison Method
   double DTW();
 
