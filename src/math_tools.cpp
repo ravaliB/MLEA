@@ -188,3 +188,23 @@ int MathTools::vectorisation(vector<Points> data, vector<Points>::iterator& it1,
 
   return n;
 }
+
+double MathTools::nbPtInRect(vector<Points> data, double width, double weight)
+{
+  double mx = means(data, 'X');
+  double my = means(data, 'Y');
+  double nb = 0;
+  double mwidth = width / 2;
+  double mweight = weight / 2;
+
+  for (vector<Points>::iterator it = data.begin(); it != data.end(); ++it)
+    {
+      if ((it->PosX <= (mx + mwidth) &&
+	   it->PosX >= (mx - mwidth)) &&
+	  (it->PosY <= (my + mweight) &&
+	   it->PosY >= (my - mweight)))
+	nb++;
+    }
+
+  return nb;
+}

@@ -57,6 +57,7 @@ class Signature
   double SA(vector<Points>& data);
   double DF(vector<Points> data, int scale);
   double DV(vector<Points> data, int thresh);
+  vector<double> DM(vector<Points> data, double ecart, double width, double weight);
 
   // Comparison Method
   double DTW();

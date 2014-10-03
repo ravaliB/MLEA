@@ -218,20 +218,38 @@ double Signature::DF(vector<Points> data, int scale)
 
 double Signature::DV(vector<Points> data, int thresh)
 {
-  int n = 0;
+  int nbvector = 0;
   double res;
   vector<Points>::iterator it = data.begin();
   bool isChangingVector = true;
 
   while (it != data.end())
     {
-      n += mt.vectorisation(data, it, thresh, isChangingVector); 
+      nbvector += mt.vectorisation(data, it, thresh, isChangingVector); 
     }
 
-  res = 1 - (log(n / thresh) / log(thresh));
-  cout << "Dim vector with thresh = " << thresh << " : " << res << endl;
+  res = 1 - (log(nbvector / thresh) / log(thresh));
   
   return res;
+}
+
+vector<double> Signature::DM(vector<Points> data, double ecart, double width, double weight)
+{
+  double area = mt.getArea(data);
+  double nbPointsInRect;
+  double res;
+  vector<double> vectRect;
+
+  while ((width * weight) < area)
+    {
+      nbPointsInRect = mt.nbPtInRect(data, width, weight);
+      res = log(nbPointsInRect) / log(width * weight);
+      vectRect.push_back(res);
+      width += ecart;
+      weight += ecart;
+    }
+  
+  return vectRect;
 }
 
 // COMPARISON METHOD
