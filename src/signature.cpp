@@ -68,6 +68,8 @@ void Signature::normalization()
 
 void Signature::getCharacteristics()
 {
+  //  DV(data_1, 15);
+  //  DV(data_2, 15);
 }
 
 void Signature::computeScore()
@@ -211,6 +213,24 @@ double Signature::DF(vector<Points> data, int scale)
   double A = mt.getArea(Xe);
   double res = 2 - (log(A / scale) / log(scale));
 
+  return res;
+}
+
+double Signature::DV(vector<Points> data, int thresh)
+{
+  int n = 0;
+  double res;
+  vector<Points>::iterator it = data.begin();
+  bool isChangingVector = true;
+
+  while (it != data.end())
+    {
+      n += mt.vectorisation(data, it, thresh, isChangingVector); 
+    }
+
+  res = 1 - (log(n / thresh) / log(thresh));
+  cout << "Dim vector with thresh = " << thresh << " : " << res << endl;
+  
   return res;
 }
 

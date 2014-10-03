@@ -161,3 +161,30 @@ vector<Points> MathTools::dilatation(vector<Points> data, int scale)
     
   return d;
 }
+
+int MathTools::vectorisation(vector<Points> data, vector<Points>::iterator& it1, int thresh, bool& vectorChanged)
+{
+  double coef, origin_ordone;
+  int n = 0;
+
+  if (vectorChanged)
+    {
+      vector<Points>::iterator it2 = it1 + 1;
+      coef = (it2->PosY - it1->PosY) / (it2->PosX - it1->PosX);
+      origin_ordone = it1->PosY - (coef * it1->PosX);
+      vectorChanged = false;
+      ++it1;
+   }
+  else
+    {
+      if (abs((coef * it1->PosX + origin_ordone) - it1->PosY) <= thresh)
+	++it1;
+      else
+	{
+	  n = 1;
+	  vectorChanged = true;
+	}
+    }
+
+  return n;
+}

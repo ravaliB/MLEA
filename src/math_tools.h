@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <math.h>
+#include <cmath>
 #include "points.h"
 
 using namespace std;
@@ -21,6 +22,7 @@ class MathTools
 		double getArea(vector<Points> data);
 		vector<Points> dilatation(vector<Points> data, int scale);
   		int linear_regression(int n, std::vector<Points> data, double* m, double* b, double* r);
+		int vectorisation(vector<Points> data, vector<Points>::iterator& it1, int thresh, bool& vectorChanged);
 };
 
 #endif /* MATH_TOOLS_HH */
