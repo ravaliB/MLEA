@@ -10,6 +10,7 @@
 #include <fstream>
 #include <math.h>
 #include <cmath>
+#include <map>
 #include "points.h"
 #include "math_tools.h"
 
@@ -68,6 +69,7 @@ class Signature
   vector<double> scores;
   MathTools mt;
   double threshold;
+  map<vector<double>, vector<double> > comparators;
 };
 
 #endif /* SIGNATURE_HH */

@@ -68,8 +68,37 @@ void Signature::normalization()
 
 void Signature::getCharacteristics()
 {
-  //  DV(data_1, 15);
-  //  DV(data_2, 15);
+  double dpd1 = DPD(data_1);
+  double df1 = DF(data_1, 2);
+  double dv1 = DV(data_1, 15);
+  vector<double> dm1 = DM(data_1, 500, mt.means(data_1, 'X'), mt.means(data_1, 'Y'));
+
+  double dpd2 = DPD(data_2);
+  double df2 = DF(data_2, 2);
+  double dv2 = DV(data_2, 15);
+  vector<double> dm2 = DM(data_2, 500, mt.means(data_2, 'X'), mt.means(data_2, 'Y')); 
+  
+  vector<double> descriptors1;
+  vector<double> descriptors2;
+  vector<double>::iterator it1, it2;
+
+  descriptors1.push_back(dpd1);
+  descriptors1.push_back(df1);
+  descriptors1.push_back(dv1);
+  descriptors2.push_back(dpd2);
+  descriptors2.push_back(df2);
+  descriptors2.push_back(dv2);
+  
+  for (it1 = dm1.begin(), it2 = dm2.begin();
+       it1 != dm1.end() && it2 != dm2.end();
+       ++it1, ++it2)
+    {
+      descriptors1.push_back(*it1);
+      descriptors2.push_back(*it2);
+    }
+  
+  comparators.insert(std::pair<vector<double>, vector<double> > (descriptors1, descriptors2));
+
 }
 
 void Signature::computeScore()
@@ -259,28 +288,46 @@ double Signature::DTW()
 {
   int N = data_1.size();
   int M = data_2.size();
-  double cost = 0;
+  //int N, M, k = -1, l = -1;
   int total = 0;
-
+  map<vector<double>, vector<double> >::iterator itmap;
+  vector<double> id1;
+  vector<double> id2;
+  double cost = 0;
   double DTW[N][M];
-
-  for (int i = 0; i < N; ++i)
-  {
-    for (int j = 0; j < M; ++j)
-      DTW[i][j] = numeric_limits<double>::max();
-  }
-
-  DTW[0][0] = 0;
-
-  for (int i = 0; i < N; ++i)
-  {
-    for (int j = 0; j < M; ++j)
+ 
+  if (comparators.empty())
+    return 0;
+  else
     {
-      total++;
-      cost = mt.euclidian_distance(data_1[i], data_2[j]);
-      DTW[i][j] = cost + min(DTW[i - 1][j], min(DTW[i][j - 1], DTW[i - 1][j - 1]));
+      itmap = comparators.begin();
+      id1 = itmap->first;
+      id2 = itmap->second;
+      // N = id1.size();
+      // M = id2.size();
+      
+      for (int k = 0; k < N; ++k)
+	{
+	  for (int l = 0; l < M; ++l)
+	    {
+	      DTW[k][l] = numeric_limits<double>::max();
+	      // DTW[k][l] = 9999;
+	    }
+	}
+      
+      DTW[0][0] = 0;
+      
+      for (int i = 0; i < id1.size(); ++i)
+	{
+	  for (int j = 0; j < id2.size(); ++j)
+	    {
+	      total++;
+	      cost = std::abs(id1[i] - id2[j]); 
+	      //cost = mt.euclidian_distance(data_1[i], data_2[j]); // remplacer data_1 et data_2 par id1 et id2
+	      DTW[i][j] = cost + min(DTW[i - 1][j], min(DTW[i][j - 1], DTW[i - 1][j - 1]));
+	    }
+	}
+      
+      return DTW[N - 1][M - 1] / total;
     }
-  }
-
-  return DTW[N - 1][M - 1] / total;
 }
