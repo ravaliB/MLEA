@@ -68,35 +68,46 @@ void Signature::normalization()
 
 void Signature::getCharacteristics()
 {
-  double dpd1 = DPD(data_1);
-  double df1 = DF(data_1, 2);
+  double df1 = DF(data_1, 10);
   double dv1 = DV(data_1, 15);
+  double sa1 = SA(data_1);
+  double dpd1 = DPD(data_1);
   vector<double> dm1 = DM(data_1, 500, mt.means(data_1, 'X'), mt.means(data_1, 'Y'));
 
-  double dpd2 = DPD(data_2);
-  double df2 = DF(data_2, 2);
+  double df2 = DF(data_2, 10);
   double dv2 = DV(data_2, 15);
+  double sa2 = SA(data_2);
+  double dpd2 = DPD(data_2);
   vector<double> dm2 = DM(data_2, 500, mt.means(data_2, 'X'), mt.means(data_2, 'Y')); 
   
   vector<double> descriptors1;
   vector<double> descriptors2;
   vector<double>::iterator it1, it2;
-
-  descriptors1.push_back(dpd1);
+  
   descriptors1.push_back(df1);
   descriptors1.push_back(dv1);
-  descriptors2.push_back(dpd2);
+  descriptors1.push_back(sa1);
+  descriptors1.push_back(dpd1);
+    
   descriptors2.push_back(df2);
   descriptors2.push_back(dv2);
+  descriptors2.push_back(sa2);
+  descriptors2.push_back(dpd2);
   
   for (it1 = dm1.begin(), it2 = dm2.begin();
        it1 != dm1.end() && it2 != dm2.end();
        ++it1, ++it2)
     {
-      descriptors1.push_back(*it1);
-      descriptors2.push_back(*it2);
+      if (((*it1) != INFINITY) && 
+	  ((*it1) >= 0) &&
+	  ((*it2) != INFINITY) &&
+	  ((*it2) >= 0))
+	{
+	  descriptors1.push_back(*it1);
+	  descriptors2.push_back(*it2);
+	} 
     }
-  
+
   comparators.insert(std::pair<vector<double>, vector<double> > (descriptors1, descriptors2));
 
 }
@@ -104,6 +115,7 @@ void Signature::getCharacteristics()
 void Signature::computeScore()
 {
   double res = threshold - DTW();
+  cout << "Compute Score : " << res << endl;
   scores.push_back(res); 
 }
 
@@ -230,19 +242,26 @@ double Signature::SA(vector<Points>& data)
   double SA = 0;
   int N = data.size();
 
-  for (int i = 0; i < N - 1; ++i)
-    SA += atan((data[i + 1].PosY -  data[i].PosY) / (data[i + 1].PosX -  data[i].PosX));
-
+  if (N == 1)
+    SA = (data[0].PosX == 0) ? 0
+      : abs(atan(data[0].PosY / data[0].PosX));
+  else
+    for (int i = 0; i < N - 1; i += 2)
+      {
+	double dx = data[i + 1].PosX -  data[i].PosX;
+	SA += (dx == 0) ? 0 
+	  : atan((data[i + 1].PosY -  data[i].PosY) / dx);
+      }
   return SA;
 }
 
 double Signature::DF(vector<Points> data, int scale)
 {
-  vector<Points> Xe = mt.dilatation(data, scale);
-  double A = mt.getArea(Xe);
+  vector<Points> Xe = mt.dilate(data, scale);
+  double A = mt.getSimpsonArea(Xe);
   double res = 2 - (log(A / scale) / log(scale));
 
-  return res;
+  return A;
 }
 
 double Signature::DV(vector<Points> data, int thresh)
@@ -268,6 +287,7 @@ vector<double> Signature::DM(vector<Points> data, double ecart, double width, do
   double nbPointsInRect;
   double res;
   vector<double> vectRect;
+  int i = 0;
 
   while ((width * weight) < area)
     {
@@ -276,6 +296,7 @@ vector<double> Signature::DM(vector<Points> data, double ecart, double width, do
       vectRect.push_back(res);
       width += ecart;
       weight += ecart;
+      i++;
     }
   
   return vectRect;
@@ -286,13 +307,14 @@ vector<double> Signature::DM(vector<Points> data, double ecart, double width, do
 // Might Require some improvement
 double Signature::DTW()
 {
-  int N = data_1.size();
-  int M = data_2.size();
-  //int N, M, k = -1, l = -1;
+  //int N = data_1.size();
+  //int M = data_2.size();
   int total = 0;
-  map<vector<double>, vector<double> >::iterator itmap;
-  vector<double> id1;
-  vector<double> id2;
+  map<vector<double>, vector<double> >::iterator itmap = comparators.begin();
+  vector<double> id1 = itmap->first;
+  vector<double> id2 = itmap->second;
+  int N = id1.size();
+  int M = id2.size();
   double cost = 0;
   double DTW[N][M];
  
@@ -305,21 +327,23 @@ double Signature::DTW()
       id2 = itmap->second;
       
       for (int k = 0; k < N; ++k)
-	{
-	  for (int l = 0; l < M; ++l)
-	      DTW[k][l] = numeric_limits<double>::max();
-	}
+	    {
+	      for (int l = 0; l < M; ++l)
+	       DTW[k][l] = numeric_limits<double>::max();
+	    }
       
       DTW[0][0] = 0;
       
-      for (int i = 0; i < id1.size(); ++i)
-	{
-	  for (int j = 0; j < id2.size(); ++j)
+      for (int i = 0; i < N; ++i)
+  	{
+	  for (int j = 0; j < M; ++j)
 	    {
 	      total++;
-	      cost = std::abs(id1[i] - id2[j]); 
+	      cost = abs(id1[i] - id2[j]); 
 	      //cost = mt.euclidian_distance(data_1[i], data_2[j]); // remplacer data_1 et data_2 par id1 et id2
 	      DTW[i][j] = cost + min(DTW[i - 1][j], min(DTW[i][j - 1], DTW[i - 1][j - 1]));
+	      //	      cout << "cost :" << cost <<  " DTW["<< i << "]["<< j << "] :" << DTW[i][j];
+	      // cout << " id1["<< i << "] :" << id1[i] << " id2[" << j << "] : " << id2[j] << endl;
 	    }
 	}
       

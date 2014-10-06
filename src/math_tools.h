@@ -20,8 +20,10 @@ class MathTools
   		double covariance(vector<Points> data);
   		double euclidian_distance(Points &a, Points &b);
 		double getArea(vector<Points> data);
-		double nbPtInRect(vector<Points> data, double width, double weight); 
+		double getSimpsonArea(vector<Points> data);
+		double nbPtInRect(vector<Points> data, double width, double weight);
 		vector<Points> dilatation(vector<Points> data, int scale);
+		vector<Points> dilate(vector<Points> data, int scale);
   		int linear_regression(int n, std::vector<Points> data, double* m, double* b, double* r);
 		int vectorisation(vector<Points> data, vector<Points>::iterator& it1, int thresh, bool& vectorChanged);
 };

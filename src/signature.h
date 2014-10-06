@@ -38,9 +38,9 @@ class Signature
   void computeScore();
 
   vector<Points> getData1() {return data_1;};
-	vector<Points> getData2() {return data_2;};
+  vector<Points> getData2() {return data_2;};
   vector<double> getScores() {return scores;};
-
+  
  private:
   // Loader
   void load(string filename, vector<Points> *data);
