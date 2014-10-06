@@ -303,16 +303,11 @@ double Signature::DTW()
       itmap = comparators.begin();
       id1 = itmap->first;
       id2 = itmap->second;
-      // N = id1.size();
-      // M = id2.size();
       
       for (int k = 0; k < N; ++k)
 	{
 	  for (int l = 0; l < M; ++l)
-	    {
 	      DTW[k][l] = numeric_limits<double>::max();
-	      // DTW[k][l] = 9999;
-	    }
 	}
       
       DTW[0][0] = 0;

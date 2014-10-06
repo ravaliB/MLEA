@@ -9,9 +9,9 @@ int biomet_input_format = ios_base::xalloc();
 
 int usage()
 {
-  cout << "USAGE : ./compSign [FILE]" << endl;
-  cout << "\tEach line of [FILE] must be written in the following format :" << endl;
-  cout << "\t\\path\\to\\file1.txt \\path\\to\\file2.txt" << endl;
+  cout << "USAGE : ./compSign [INPUT] [OUTPUT]" << endl << endl;
+  cout << "Each line of [INPUT] must be written in the following format :" << endl;
+  cout << "\\path\\to\\file1.txt \\path\\to\\file2.txt" << endl;
   
   return -1;
 }
