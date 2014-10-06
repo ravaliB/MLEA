@@ -53,7 +53,7 @@ void Parser::writeOutput(vector<double> scores)
 	{
 		out << files_1[i] << " " << files_2[i] << " " << scores[i];
 
-		if (scores[i] < 0)
+		if (scores[i] < 15)
 			out << " F" << endl;
 		else
 			out << " T" << endl;

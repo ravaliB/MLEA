@@ -143,6 +143,37 @@ double MathTools::getArea(vector<Points> data)
   return width * weight;
 }
 
+double MathTools::getSimpsonArea(vector<Points> data)
+{
+  double a = means(data, 'X');
+  double b = means(data, 'X');
+  double n = data.size();
+  double h;
+  double sum1, sum2, res;
+  
+  for (vector<Points>::iterator it = data.begin(); it != data.end(); ++it)
+    {
+      a = (a > it->PosX) ? it->PosX : a;
+      b = (b < it->PosX) ? it->PosX : b;
+    }
+  
+  h = (b - a) / n;
+  
+  for (int i = 2; i < n / (2 - 1); i += 2)
+    {
+      sum1 += data[i].PosY;      
+    }
+
+  for (int j = 1; j < n / 2; j += 2) 
+    {
+      sum2 += data[j].PosY;
+    } 
+ 
+  res = h/3 * (data[0].PosY + 2 * sum1 + 4 * sum2 + data[n].PosY);
+
+  return abs(res);
+}
+
 //A modifier si possible
 vector<Points> MathTools::dilatation(vector<Points> data, int scale)
 {
@@ -161,6 +192,34 @@ vector<Points> MathTools::dilatation(vector<Points> data, int scale)
     
   return d;
 }
+
+vector<Points> MathTools::dilate(vector<Points> data, int scale)
+{
+  vector<Points> d;
+  Points pr, pl, pt, pb; //points at right, left, top and bottom
+
+  for (vector<Points>::iterator it = data.begin(); it != data.end(); ++it)
+    {
+      pr = (*it);
+      pl = (*it);
+      pt = (*it);
+      pb = (*it);
+
+      pr.PosX += scale;
+      pl.PosX -= scale;
+      pt.PosY += scale;
+      pb.PosY -= scale;
+     
+      d.push_back(pr);
+      d.push_back(pl);
+      d.push_back((*it));
+      d.push_back(pt);
+      d.push_back(pb);
+    }
+
+  return d;
+}
+
 
 int MathTools::vectorisation(vector<Points> data, vector<Points>::iterator& it1, int thresh, bool& vectorChanged)
 {
