@@ -45,15 +45,15 @@ void Parser::parse(string input)
 	ifs.close();
 }
 
-void Parser::writeOutput(vector<double> scores)
+void Parser::writeOutput(vector<double> scores, string output)
 {
-	ofstream out("output.txt");
+	ofstream out(output);
 
 	for (int i = 0; i < scores.size(); ++i)
 	{
 		out << files_1[i] << " " << files_2[i] << " " << scores[i];
 
-		if (scores[i] < 15)
+		if (scores[i] < 0)
 			out << " F" << endl;
 		else
 			out << " T" << endl;

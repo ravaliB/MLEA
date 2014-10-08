@@ -54,18 +54,24 @@ class Signature
   void center(vector<Points>& data);
 
   // Caracteristics
-  double DPD(vector<Points>& data);
-  double SA(vector<Points>& data);
+  double DPD(vector<Points> data);
+  double SA(vector<Points> data);
   double DF(vector<Points> data, int scale);
   double DV(vector<Points> data, int thresh);
   vector<double> DM(vector<Points> data, double ecart, double width, double weight);
 
   // Comparison Method
-  double DTW();
+  double DTW(double a, double b);
 
   // Attributes
   vector<Points> data_1;
   vector<Points> data_2;
+
+  double sa1;
+  double sa2;
+  double dpd1;
+  double dpd2;
+
   vector<double> scores;
   MathTools mt;
   double threshold;

@@ -1,5 +1,4 @@
 #include "signature.h"
-#include "printer.h"
 #include "parser.h"
 #include "points.h"
 
@@ -19,7 +18,6 @@ int usage()
 int main(int argc, char *argv[])
 {
   Signature sign;
-  Printer pr;
   Parser pa;
   
   vector<Points> data1;
@@ -30,31 +28,31 @@ int main(int argc, char *argv[])
   double threshold = 0;
   double res = 0;
 	
-  if (argc != 2)
+  if (argc != 3)
     usage();
   else
-    {
-      pa.parse(argv[1]);
-      files_1 = pa.getFiles_1();
-      files_2 = pa.getFiles_2();
+  {
+	pa.parse(argv[1]);
+    files_1 = pa.getFiles_1();
+    files_2 = pa.getFiles_2();
 	    
-      if (files_1.size() != files_2.size())
-	usage();
-      else
+	if (files_1.size() != files_2.size())
+		usage();
+	else
 	{
-	  for (int i = 0; i < files_1.size(); ++i)
-	    {
-	      sign.loadSignatures(files_1[i], files_2[i]);
-	      sign.reduction();
-	      sign.normalization();
-	      sign.getCharacteristics();
-	      sign.computeScore();
-	      sign.reset();
-	    }
+		for (int i = 0; i < files_1.size(); ++i)
+		{
+	  		sign.loadSignatures(files_1[i], files_2[i]);
+	  		sign.reduction();
+			sign.normalization();
+			sign.getCharacteristics();
+			sign.computeScore();
+			sign.reset();
+		}
 	  
-	  pa.writeOutput(sign.getScores());
+		pa.writeOutput(sign.getScores(), argv[2]);
 	}
-    }
+  }
   
   return 0;
 }

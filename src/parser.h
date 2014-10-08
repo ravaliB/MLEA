@@ -13,7 +13,7 @@ public:
 	vector<string> getFiles_2();
 
 	void parse(string input);
-	void writeOutput(vector<double> scores);
+	void writeOutput(vector<double> scores, string output);
 
 private:
 	vector<string> files_1;

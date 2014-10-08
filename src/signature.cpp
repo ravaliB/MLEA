@@ -29,7 +29,7 @@ ostream &operator<<(ostream&       os,
 }
 
 Signature::Signature()
-:threshold(15)
+:threshold(14)
 {
   mt = MathTools();
 }
@@ -68,16 +68,16 @@ void Signature::normalization()
 
 void Signature::getCharacteristics()
 {
-  double df1 = DF(data_1, 10);
-  double dv1 = DV(data_1, 15);
-  double sa1 = SA(data_1);
-  double dpd1 = DPD(data_1);
+  double df1 = DF(data_1, 02);
+  double dv1 = DV(data_1, 30);
+  sa1 = SA(data_1);
+  dpd1 = DPD(data_1);
   vector<double> dm1 = DM(data_1, 500, mt.means(data_1, 'X'), mt.means(data_1, 'Y'));
 
-  double df2 = DF(data_2, 10);
-  double dv2 = DV(data_2, 15);
-  double sa2 = SA(data_2);
-  double dpd2 = DPD(data_2);
+  double df2 = DF(data_2, 02);
+  double dv2 = DV(data_2, 30);
+  sa2 = SA(data_2);
+  dpd2 = DPD(data_2);
   vector<double> dm2 = DM(data_2, 500, mt.means(data_2, 'X'), mt.means(data_2, 'Y')); 
   
   vector<double> descriptors1;
@@ -88,7 +88,7 @@ void Signature::getCharacteristics()
   descriptors1.push_back(dv1);
   descriptors1.push_back(sa1);
   descriptors1.push_back(dpd1);
-    
+
   descriptors2.push_back(df2);
   descriptors2.push_back(dv2);
   descriptors2.push_back(sa2);
@@ -109,13 +109,26 @@ void Signature::getCharacteristics()
     }
 
   comparators.insert(std::pair<vector<double>, vector<double> > (descriptors1, descriptors2));
-
 }
 
 void Signature::computeScore()
 {
-  double res = threshold - DTW();
-  cout << "Compute Score : " << res << endl;
+  double res = threshold - DTW(1, 0.00);
+
+  if (abs(sa1 - sa2) < 3)
+    res += (6 - abs(sa1 - sa2)) / 2;
+
+  else if (30 < abs(sa1 - sa2))
+    res -= 1.5;
+
+  double p = 100 * (abs(dpd1 - dpd2) / max(dpd1, dpd2));
+
+  if (p < 3)
+    res += 3 - p;
+
+  else if (25 < p)
+    res -= p - 25;
+
   scores.push_back(res); 
 }
 
@@ -227,7 +240,7 @@ void Signature::center(vector<Points>& data)
 
 // CHARACTERISTICS
 
-double Signature::DPD(vector<Points>& data)
+double Signature::DPD(vector<Points> data)
 {
   double DPD = 0;
   int N = data.size();
@@ -237,21 +250,21 @@ double Signature::DPD(vector<Points>& data)
   return DPD;
 }
 
-double Signature::SA(vector<Points>& data)
+double Signature::SA(vector<Points> data)
 {
   double SA = 0;
+  double res = 0;
   int N = data.size();
 
-  if (N == 1)
-    SA = (data[0].PosX == 0) ? 0
-      : abs(atan(data[0].PosY / data[0].PosX));
-  else
-    for (int i = 0; i < N - 1; i += 2)
-      {
-	double dx = data[i + 1].PosX -  data[i].PosX;
-	SA += (dx == 0) ? 0 
-	  : atan((data[i + 1].PosY -  data[i].PosY) / dx);
-      }
+
+  for (int i = 0; i < N - 1; i++)
+  {
+	 res = atan((data[i + 1].PosY -  data[i].PosY) / (data[i + 1].PosX - data[i].PosX));
+
+   if (res == res)
+    SA += res;
+  }
+
   return SA;
 }
 
@@ -305,48 +318,32 @@ vector<double> Signature::DM(vector<Points> data, double ecart, double width, do
 // COMPARISON METHOD
 
 // Might Require some improvement
-double Signature::DTW()
+double Signature::DTW(double a, double b)
 {
-  //int N = data_1.size();
-  //int M = data_2.size();
-  int total = 0;
-  map<vector<double>, vector<double> >::iterator itmap = comparators.begin();
-  vector<double> id1 = itmap->first;
-  vector<double> id2 = itmap->second;
-  int N = id1.size();
-  int M = id2.size();
+  int N = data_1.size();
+  int M = data_2.size();
   double cost = 0;
+  int total = 0;
+
   double DTW[N][M];
- 
-  if (comparators.empty())
-    return 0;
-  else
+
+  for (int i = 0; i < N; ++i)
+  {
+    for (int j = 0; j < M; ++j)
+      DTW[i][j] = numeric_limits<double>::max();
+  }
+
+  DTW[0][0] = 0;
+
+  for (int i = 0; i < N; ++i)
+  {
+    for (int j = 0; j < M; ++j)
     {
-      itmap = comparators.begin();
-      id1 = itmap->first;
-      id2 = itmap->second;
-      
-      for (int k = 0; k < N; ++k)
-	    {
-	      for (int l = 0; l < M; ++l)
-	       DTW[k][l] = numeric_limits<double>::max();
-	    }
-      
-      DTW[0][0] = 0;
-      
-      for (int i = 0; i < N; ++i)
-  	{
-	  for (int j = 0; j < M; ++j)
-	    {
-	      total++;
-	      cost = abs(id1[i] - id2[j]); 
-	      //cost = mt.euclidian_distance(data_1[i], data_2[j]); // remplacer data_1 et data_2 par id1 et id2
-	      DTW[i][j] = cost + min(DTW[i - 1][j], min(DTW[i][j - 1], DTW[i - 1][j - 1]));
-	      //	      cout << "cost :" << cost <<  " DTW["<< i << "]["<< j << "] :" << DTW[i][j];
-	      // cout << " id1["<< i << "] :" << id1[i] << " id2[" << j << "] : " << id2[j] << endl;
-	    }
-	}
-      
-      return DTW[N - 1][M - 1] / total;
+      total++;
+      cost = a * mt.euclidian_distance(data_1[i], data_2[j]) + b * (abs(data_1[i].Timestamp - data_2[j].Timestamp)) / 10000;
+      DTW[i][j] = cost + min(DTW[i - 1][j], min(DTW[i][j - 1], DTW[i - 1][j - 1]));
     }
+  }
+
+  return DTW[N - 1][M - 1] / total;
 }
